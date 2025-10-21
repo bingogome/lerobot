@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+import time
 from functools import cached_property
 from typing import Any
 
@@ -199,7 +200,10 @@ class LeKiwiBase(Robot):
         if not self.is_connected:
             raise DeviceNotConnectedError(f"{self} is not connected.")
 
-        base_wheel_vel = self.bus.sync_read("Present_Velocity", self.base_motors)
+        # Small delay to prevent serial bus congestion, especially important after multiple episodes
+        time.sleep(0.001)  # 1ms delay
+
+        base_wheel_vel = self.bus.sync_read("Present_Velocity", self.base_motors, num_retry=3)
         base_vel = self._wheel_raw_to_body(
             base_wheel_vel["base_left_wheel"],
             base_wheel_vel["base_back_wheel"],
