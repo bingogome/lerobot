@@ -200,8 +200,9 @@ class LeKiwiBase(Robot):
         if not self.is_connected:
             raise DeviceNotConnectedError(f"{self} is not connected.")
 
-        # Small delay to prevent serial bus congestion, especially important after multiple episodes
-        time.sleep(0.001)  # 1ms delay
+        # Clear port buffer to prevent accumulation over multiple episodes
+        self.bus.port_handler.clearPort()
+        self.bus.port_handler.is_using = False
 
         base_wheel_vel = self.bus.sync_read("Present_Velocity", self.base_motors, num_retry=3)
         base_vel = self._wheel_raw_to_body(
